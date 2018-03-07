@@ -6,7 +6,7 @@ from requests.auth import HTTPBasicAuth
 import json 
 from pprint import pprint
 import datetime
-import piutils
+import piutils as piutils
 
 configFilename = "config.json"
 
@@ -52,12 +52,20 @@ def get_up_stats():
         return ("", 0)
 
 def get_proc_uptime():
-    #Returns a tuple (uptime in seconds, idle seconds).
+    # Returns uptime in seconds
     try:
         s = subprocess.check_output(["cat", "/proc/uptime"])
-        return (s.split(" "))
+        return int(float(s.split(" ")[0]))
     except:
-        return ("", 0)
+        return 0
+
+def get_proc_idletime():
+    # Returns idle cpu time in seconds
+    try:
+        s = subprocess.check_output(["cat", "/proc/uptime"])
+        return int(float(s.split(" ")[1]))
+    except:
+        return 0
 
 def get_connections():
     #Returns the number of network connections.
@@ -75,37 +83,49 @@ def get_cpu_temperature():
     except:
         return 0
 
-def get_ipaddress():
-    #Returns the current IP address.
-    arg = "ip route list"
-    p = subprocess.Popen(arg,shell=True,stdout=subprocess.PIPE)
-    data = p.communicate()
-    split_data = data[0].split()
-    ipaddr = split_data[split_data.index("src")+1]
-    return ipaddr
 
 
-print(" { ramFree: " + str(get_ram()[1])\
-    + ", ramTotal: " +str(get_ram()[0])\
-    + ", processes: " + str(get_process_count())\
-    + ", cpuTemp: " + str(get_cpu_temperature())\
-    + ", ipAddress: " + get_ipaddress()\
-    + ", uptime: " + str(get_proc_uptime()[0])\
-    + ", cpuLoad: " + str(get_up_stats()[1])\
-    + " } ")
+# piRamFree: str(get_ram()[1])
+# ramTotal: str(get_ram()[0])
+# processes: str(get_process_count())
+# piCpuTemp: str(get_cpu_temperature())
+# lanIpAddress: piutils.getLanIpAddress()
+# piUptime: str(get_proc_uptime())
+# piCpuLoad: str(get_up_stats()[1])
 
+(piLatitude, piLongitude) = piutils.getLatLong()
+print('Latitude/Longitude found as ' + str(piLatitude) + ", " + str(piLongitude))
 
-dataToSend = '{ "UUID": "' + filedata['UUID'] + '", '\
-    + ' "name": "43040_101", '\
-    + ' "value": ' + str(get_up_stats()[1]) + ', '\
-    + ' "msg_type": "datum" '\
-    + ' } '
-headers = {'Accept' : 'application/json', 'Content-Type' : 'application/json'}
-print('Sending data to server: ' + dataToSend)
-r = requests.put(filedata['server'] + '/api/v1/iotdata', data=dataToSend, headers=headers)
-if (r.status_code == 200):
-    print(r.content)
-    print("Device data sent ok")
-else:
-    print("Cannot reach server. " + str(r.status_code))
-    
+dataToSend = { 
+    "UUID": filedata['UUID'],
+    "name": "piUptime",
+    "value": get_proc_uptime(),
+    "msg_type": "datum",
+    "latitude": piLatitude,
+    "longitude": piLongitude
+}
+
+while True:
+    # Inform user of the overall data being sent for a single metric
+    print('Sending data to server: ' + filedata['server'])
+    print(json.dumps(dataToSend, indent=4))
+    #
+    # Send CPU uptime as metric piUptime to server
+    dataToSend['name'] = 'piUptime'
+    dataToSend['value'] = get_proc_uptime()
+    piutils.sendDataToServer(dataToSend, filedata['server'])
+    #
+    dataToSend['name'] = 'piCpuTemp'
+    dataToSend['value'] = get_cpu_temperature()
+    piutils.sendDataToServer(dataToSend, filedata['server'])
+    #
+    dataToSend['name'] = 'piCpuLoad'
+    dataToSend['value'] = get_up_stats()[1]
+    piutils.sendDataToServer(dataToSend, filedata['server'])
+    #
+    dataToSend['name'] = 'piRamFree'
+    dataToSend['value'] = get_ram()[1]
+    piutils.sendDataToServer(dataToSend, filedata['server'])
+    #
+    print(str(datetime.datetime.now()) + ' Pausing for 30 seconds...\n')
+    time.sleep(30)

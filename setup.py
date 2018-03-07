@@ -6,7 +6,7 @@ import time, requests, os.path
 from requests.auth import HTTPBasicAuth
 import json 
 from pprint import pprint
-import datetime
+import datetime, sys
 import piutils
 
 configFilename = "config.json"
@@ -40,11 +40,12 @@ if('deviceName' not in filedata):
     filedata['deviceName'] = raw_input("Name for this device? ")
     serverUsername = raw_input('Username:')
     serverPassword = raw_input('Password:')
-    contents = '{ "name": "' + filedata['deviceName'] + '", "serialNumber": "' + filedata['deviceName'] + '" }'
+    contents = '{ "name": "' + filedata['deviceName'] + '", "'\
+        + '"serialNumber": "' + filedata['deviceName'] + '" }'
     headers = {'Accept' : 'application/json', 'Content-Type' : 'application/json'}
     #print('Sending data to server: ' + contents)
     r = requests.post(filedata['server'] + '/api/v1/devices', data=contents, \
-    headers=headers, auth=HTTPBasicAuth(serverUsername, serverPassword))
+        headers=headers, auth=HTTPBasicAuth(serverUsername, serverPassword))
     if(r.status_code == 200):
         print(r.content)
         filedata['UUID'] = json.loads(r.content)[0]['UUID']
@@ -54,6 +55,15 @@ if('deviceName' not in filedata):
             json.dump(filedata, outfile, indent=4)
     else:
         print("Cannot reach server. " + str(r.status_code))
+        sys.exit()
+    #
+    # Create metrics on server    
+    createMetricOnServer('piCpuLoad', '%', filedata['server'], serverUsername, serverPassword)
+    createMetricOnServer('piUptime', 's', filedata['server'], serverUsername, serverPassword)
+    createMetricOnServer('piCpuTemp', 'C', filedata['server'], serverUsername, serverPassword)
+    createMetricOnServer('piRamFree', '%', filedata['server'], serverUsername, serverPassword)
+    createMetricOnServer('piTemperature', 'C', filedata['server'], serverUsername, serverPassword)
+    createMetricOnServer('piHumidity', '%', filedata['server'], serverUsername, serverPassword)
     
 
 print("Finished setup.")
