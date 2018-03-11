@@ -59,12 +59,12 @@ if('deviceName' not in filedata):
         sys.exit()
     #
     # Create metrics on server    
-    createMetricOnServer('piCpuLoad', '%', filedata['server'], serverUsername, serverPassword)
-    createMetricOnServer('piUptime', 's', filedata['server'], serverUsername, serverPassword)
-    createMetricOnServer('piCpuTemp', 'C', filedata['server'], serverUsername, serverPassword)
-    createMetricOnServer('piRamFree', '%', filedata['server'], serverUsername, serverPassword)
-    createMetricOnServer('piTemperature', 'C', filedata['server'], serverUsername, serverPassword)
-    createMetricOnServer('piHumidity', '%', filedata['server'], serverUsername, serverPassword)
+    piutils.createMetricOnServer('piCpuLoad', '%', filedata['server'], serverUsername, serverPassword)
+    piutils.createMetricOnServer('piUptime', 's', filedata['server'], serverUsername, serverPassword)
+    piutils.createMetricOnServer('piCpuTemp', 'C', filedata['server'], serverUsername, serverPassword)
+    piutils.createMetricOnServer('piRamFree', '%', filedata['server'], serverUsername, serverPassword)
+    piutils.createMetricOnServer('piTemperature', 'C', filedata['server'], serverUsername, serverPassword)
+    piutils.createMetricOnServer('piHumidity', '%', filedata['server'], serverUsername, serverPassword)
     
 
 print("Finished setup.")
