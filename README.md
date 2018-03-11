@@ -44,7 +44,7 @@ sudo dht-install.sh
 ```
 That will install the DHT (Digital Humidity and Temperature) program so that it the Pi can understand the readings coming from the sensor. It may take a minute or 2 to complete and may ask you to approve the installation of more files. If so, type "y" without the quotes to approve the request. Then type the following at the Raspberry Pi prompt:
 ```
-python pi-dht.py
+sudo python pi-dht.py
 ```
 This program will keep running, reading the temperature and pressure at 30 second intervals and uploading them to the Connecthing server.
 
