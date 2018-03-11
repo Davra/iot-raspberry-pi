@@ -20,7 +20,7 @@ if(os.path.isfile(utilsConfigFilename) == True):
 
 
 def createMetricOnServer(metricName, metricUnits, serverAddress, serverUsername, serverPassword):
-    contents = '[{ "name": "' + metricName + '", "'\
+    contents = '[{ "name": "' + metricName + '", '\
         + '"label": "' + metricName + '", '\
         + '"semantics": "metric" }]'
     headers = {'Accept' : 'application/json', 'Content-Type' : 'application/json'}
