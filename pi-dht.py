@@ -1,3 +1,4 @@
+# Please run as root. Eg. sudo python pi-dht.py
 import RPi.GPIO as GPIO
 import subprocess
 import os, sys
@@ -24,10 +25,13 @@ if('server' not in filedata or 'UUID' not in filedata):
 def get_dht():
     # Get the temperature and Humidiy from air sensor. Returns a tubple (Temp, humidity)
     try:
-        s = subprocess.check_output(["sudo", "./Adafruit_Python_DHT/examples/AdafruitDHT.py 2302 4"])
-        lines = s.split(" ")
-        if(len(lines) == 2):
-            return (float(lines[0].split("=")[1].replace('*','')), float(lines[1].split("=")[1].replace('%','')))
+        s = subprocess.check_output([os.getcwd() + "/Adafruit_Python_DHT/examples/AdafruitDHT.py", "2302", "4"])
+        print("Sensor measurement returned " + s) # E.g.  Temp=19.8*  Humidity=41.5%
+        lines = s.split("  ")
+        if(len(lines) > 1):
+            tmpTemp = lines[0].split("=")[1].replace('*','')
+            tmpHum = lines[1].split("=")[1].replace('%','')
+            return (float(tmpTemp), float(tmpHum))
         else:
             return ("Failed to read Temperature and Pressure from sensor")
     except:
@@ -47,7 +51,7 @@ dataToSend = {
 while True:
     #
     # Send metric to server and inform user via console
-    piTemperature = get_dht()[0]
+    (piTemperature, piHumidity) = get_dht()
     dataToSend['name'] = 'piTemperature'
     dataToSend['value'] = piTemperature
     print('Sending data to server: ' + filedata['server'])
@@ -55,7 +59,7 @@ while True:
     piutils.sendDataToServer(dataToSend, filedata['server'])
     #
     dataToSend['name'] = 'piHumidity'
-    dataToSend['value'] = get_dht()[1]
+    dataToSend['value'] = piHumidity
     print('Sending data to server: ' + filedata['server'])
     print(json.dumps(dataToSend, indent=4))
     piutils.sendDataToServer(dataToSend, filedata['server'])

@@ -82,10 +82,11 @@ def getLatLong():
         print("Cannot reach server. " + str(r.status_code))
         return (0,0)
         
-
 def blinkLed(blinksPerSecond, secondsToBlinkFor):
+    GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(27, GPIO.OUT, initial=GPIO.LOW)
+    GPIO.setwarnings(True)
     ledMode = GPIO.LOW
     countBlinks = 0.0
     while countBlinks < (blinksPerSecond * secondsToBlinkFor):
@@ -93,7 +94,7 @@ def blinkLed(blinksPerSecond, secondsToBlinkFor):
             ledMode = GPIO.HIGH
         else:
             ledMode = GPIO.LOW
-        print("Setting LED " + str(ledMode))
+        #print("Setting LED " + str(ledMode))
         GPIO.output(27, ledMode)
         time.sleep(0.5 / blinksPerSecond)
         countBlinks += 0.5
