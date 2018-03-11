@@ -40,7 +40,7 @@ if('deviceName' not in filedata):
     filedata['deviceName'] = raw_input("Name for this device? ")
     serverUsername = raw_input('Username:')
     serverPassword = raw_input('Password:')
-    contents = '{ "name": "' + filedata['deviceName'] + '", "'\
+    contents = '{ "name": "' + filedata['deviceName'] + '", '\
         + '"serialNumber": "' + filedata['deviceName'] + '" }'
     headers = {'Accept' : 'application/json', 'Content-Type' : 'application/json'}
     #print('Sending data to server: ' + contents)
@@ -54,6 +54,7 @@ if('deviceName' not in filedata):
         with open(configFilename, 'w') as outfile:
             json.dump(filedata, outfile, indent=4)
     else:
+        print(r.content)
         print("Cannot reach server. " + str(r.status_code))
         sys.exit()
     #
