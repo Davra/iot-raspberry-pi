@@ -51,13 +51,14 @@ dataToSend = {
 while True:
     #
     # Send metric to server and inform user via console
-    (piTemperature, piHumidity) = get_dht()
+    piTemperature = get_dht()[0]
     dataToSend['name'] = 'piTemperature'
     dataToSend['value'] = piTemperature
     print('Sending data to server: ' + filedata['server'])
     print(json.dumps(dataToSend, indent=4))
     piutils.sendDataToServer(dataToSend, filedata['server'])
     #
+    piHumidity = get_dht()[1]
     dataToSend['name'] = 'piHumidity'
     dataToSend['value'] = piHumidity
     print('Sending data to server: ' + filedata['server'])
